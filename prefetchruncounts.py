@@ -28,7 +28,6 @@ def parse_file(prefetch_file):
         pf_file_name = os.path.basename(prefetch_file)
         scca = pyscca.open(prefetch_file)
         prefetch_version = str(scca.format_version)
-        version_of_prefetch = str(scca.format_version)
         executable_file_name = str(scca.executable_filename)
         prefetch_hash = format(scca.prefetch_hash, 'x').upper()
         run_count = (scca.run_count) 
