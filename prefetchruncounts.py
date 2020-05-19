@@ -25,6 +25,7 @@ import argparse
 import os
 import pyscca
 
+
 def parse_file(prefetch_file,outpath):
     try:
         #open prefetch file with pyscca and get values
@@ -38,19 +39,18 @@ def parse_file(prefetch_file,outpath):
         run_count = (scca.run_count) 
         number_of_volumes = str(scca.number_of_volumes)
         number_of_files = str(scca.number_of_file_metrics_entries)
-        # Access encoded strings and send to file
         count=1
         all_strings = []
         for entry_index, file_metrics in enumerate(scca.file_metrics_entries):            
             mapped_file_string = file_metrics.filename
             strings = (pf_file_name,executable_file_name,count, number_of_files,mapped_file_string)
-            count = (count + 1)
             all_strings.append(strings)
-            stringsfile = (outpath + '_strings.csv')
-            strings_file = open(stringsfile, 'a+')
-            with strings_file:
-                write = csv.writer(strings_file) 
-                write.writerows(all_strings) 
+            count = (count + 1)
+        stringsfile = (outpath + '_strings.csv')
+        strings_file = open(stringsfile, 'a+')
+        with strings_file:
+            write = csv.writer(strings_file) 
+            write.writerows(all_strings) 
         #Parse last run timestamps for each last run value
         for exe_timestamp in range(8):            
             if scca.get_last_run_time_as_integer(exe_timestamp) > 0:
@@ -64,15 +64,14 @@ def parse_file(prefetch_file,outpath):
                     volume_timestamp = volume_information.creation_time.strftime("%Y-%m-%d %H:%M:%S")
                     prefetch_values.append(volume_timestamp)
                     prefetch_values.append(volume_device_path)
-                    prefetch_values.append(volume_serial_number)
-                #print run counts results to stdout and send to file   
+                    prefetch_values.append(volume_serial_number)   
                 print(','.join(prefetch_values))
                 everything.append(prefetch_values)
                 runcountsfile = (outpath + '_run_count.csv')
                 run_count_file = open(runcountsfile, 'a+')
-                with run_count_file:     
-                    write = csv.writer(run_count_file)
-                    write.writerows(everything)                 
+        with run_count_file:     
+            write = csv.writer(run_count_file)
+            write.writerows(everything)                 
     except:
         pass
 
@@ -86,19 +85,20 @@ def main():
     outpath = args.output
 
     #Create header for output files
-    pf_header="last_run_time,exe_file,pf_hash,pf_run_count,pf_version,pf_file,volume_count,volume_timestamp,volume_dev_path,volume_serial_number,volume_timestamp,volume_dev_path,volume_serial_number"
-    pf_strings_header="pf_file,pf_executable_file,file_sequence,total_files,files_loaded"  
+    pf_header='last_run_time,exe_file,pf_hash,pf_run_count,pf_version,pf_file,volume_count,volume_timestamp,volume_dev_path,volume_serial_number,volume_timestamp,volume_dev_path,volume_serial_number'
+    strings_header='pf_file,pf_executable_file,file_sequence,total_files,files_loaded'
     print(pf_header)
 
     #Write header information for 2 output files
-    strings_file = open((outpath + '_strings.csv'), "w")
-    writer = csv.DictWriter(strings_file, fieldnames=[pf_strings_header])
-    writer.writeheader()
-    strings_file.close()
     run_counts_file = open((outpath + '_run_count.csv'), "w")
-    writer = csv.DictWriter(run_counts_file, fieldnames=[pf_header])
-    writer.writeheader()
+    write = csv.writer(run_counts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar=' ')
+    write.writerow([pf_header])
     run_counts_file.close()
+    strings_file = open((outpath + '_strings.csv'), "w")
+    write = csv.writer(strings_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar=' ')
+    write.writerow([strings_header])
+    strings_file.close()
+
 
     #Enumerate and verify files in directory path, then send to parser
     if (os.path.isdir(args.file_or_directory)):
