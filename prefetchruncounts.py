@@ -85,7 +85,7 @@ def main():
     outpath = args.output
 
     #Create header for output files
-    pf_header='last_run_time,exe_file,pf_hash,pf_run_count,pf_version,pf_file,volume_count,volume_timestamp,volume_dev_path,volume_serial_number,volume_timestamp,volume_dev_path,volume_serial_number'
+    pf_header='last_run_time,exe_file,pf_hash,pf_run_count,pf_file,pf_version,volume_count,volume_timestamp,volume_dev_path,volume_serial_number,volume_timestamp,volume_dev_path,volume_serial_number'
     strings_header='pf_file,pf_executable_file,file_sequence,total_files,files_loaded'
     print(pf_header)
 
