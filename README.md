@@ -20,13 +20,7 @@ example command:<br/>
 -python prefetch.py /media/usb/Prefetch/ -o Win10x385<br/><br/>
 
 Prefetch_run_counts.csv outputs the following fields:<br/>  
-***
-*.last_run_time
-*.exe_file
-*.pf_hash
-*.pf_run_count
-*.pf_version
-*.pf_file
+***last_run_time  exe_file  pf_hash  pf_run_count  pf_version  pf_file
 *.volume_count 
 *.volume_timestamp
 *.volume_dev_path
