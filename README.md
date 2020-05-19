@@ -9,16 +9,16 @@ Uses pyscca to decompress pf MAM files and list files executed in a separate fil
 
 
 Expects either a file path or directory and will parse automatically
--Creates 2 files-
--Prefetch_run_counts.csv-
--Prefetch_strings.csv-
--Output file name "Prefetch" can be changed witht the "-o" switch-
+-Creates 2 files
+-Prefetch_run_counts.csv
+-Prefetch_strings.csv
+-Output file name "Prefetch" can be changed witht the "-o" switch
 
 
 example command:
--python prefetch.py /media/usb/Prefetch/WWAHOST.EXE-776591F6.pf-
--python prefetch.py /media/usb/Prefetch/-
--python prefetch.py /media/usb/Prefetch/ -o Win10x385-
+-python prefetch.py /media/usb/Prefetch/WWAHOST.EXE-776591F6.pf
+-python prefetch.py /media/usb/Prefetch/
+-python prefetch.py /media/usb/Prefetch/ -o Win10x385
 
 
 Prefetch_run_counts.csv outputs the following fields:  
