@@ -28,6 +28,7 @@ import pyscca
 def parse_file(prefetch_file,outpath):
     try:
         #open prefetch file with pyscca and get values
+        everything = []
         prefetch_values = []
         pf_file_name = os.path.basename(prefetch_file)
         scca = pyscca.open(prefetch_file)
