@@ -8,13 +8,13 @@
 #   Prefetch_run_counts.csv
 #   Prefetch_strings.csv
 #
-# Output file name "Prefetch" can be changed witht the "-o" switch
+# Output file name "Prefetch" and path can be changed witht the "-o" switch
 
 # examples
 
 #   python prefetch.py /media/usb/Prefetch/WWAHOST.EXE-776591F6.pf
 #   python prefetch.py /media/usb/Prefetch/
-#   python prefetch.py /media/usb/Prefetch/ -o Win10x385
+#   python prefetch.py /media/usb/Prefetch/ -o /cases/Win10x385
 
 #
 # Based on pyscca, plaso, prefetch.py and  w10pfdecomp.py, w10pf_parse.py 
@@ -64,11 +64,17 @@ def parse_file(prefetch_file,outpath):
                     volume_timestamp = volume_information.creation_time.strftime("%Y-%m-%d %H:%M:%S")
                     prefetch_values.append(volume_timestamp)
                     prefetch_values.append(volume_device_path)
-                    prefetch_values.append(volume_serial_number)   
+                    prefetch_values.append(volume_serial_number)
                 print(','.join(prefetch_values))
-                everything.append(prefetch_values)
                 runcountsfile = (outpath + '_run_count.csv')
-                run_count_file = open(runcountsfile, 'a+')
+                if int(prefetch_version) <30:
+                    run_count_file = open(runcountsfile, 'a+')
+                    with run_count_file:     
+                        write = csv.writer(run_count_file)
+                        write.writerow(prefetch_values)
+                        exit() 
+                everything.append(prefetch_values)
+        run_count_file = open(runcountsfile, 'a+')
         with run_count_file:     
             write = csv.writer(run_count_file)
             write.writerows(everything)                 
