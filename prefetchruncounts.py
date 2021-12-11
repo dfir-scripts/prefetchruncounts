@@ -1,109 +1,79 @@
 #! /usr/bin/env python3
-# Parse and extract a sortable list of basic Windows Prefetch file information based on "last run" timestamps 
-# Outputs the last and most recent 8 run times for Windows 10 and later(Earlier prefetch versions only show the most recent run time)  
-# Uses pyscca to decompress pf MAM files and list files executed in a separate file
-
-# Expects either a file path or directory and will parse automatically
-#Creates 2 files by default  
-#   Prefetch_run_counts.csv
-#   Prefetch_strings.csv
+# Parse and extract information from Windows prefetch files
+# Outputs the 8 most recent run times of Windows 10 and newer systems
 #
-# Output file name "Prefetch" and path can be changed witht the "-o" switch
-
-# examples
-
-#   python prefetch.py /media/usb/Prefetch/WWAHOST.EXE-776591F6.pf
-#   python prefetch.py /media/usb/Prefetch/
-#   python prefetch.py /media/usb/Prefetch/ -o /cases/Win10x385
-
 #
-# Based on pyscca, plaso, prefetch.py and  w10pfdecomp.py, w10pf_parse.py 
-# 
+#
 
-import csv
 import argparse
 import os
 import pyscca
+from tabulate import tabulate
 
-
-def parse_file(prefetch_file,outpath):
+def parse_file(prefetch_file,Timeline):
     try:
         #open prefetch file with pyscca and get values
-        everything = []
-        prefetch_values = []
         pf_file_name = os.path.basename(prefetch_file)
         scca = pyscca.open(prefetch_file)
+        #prefetch file values
+        prefetch_values = []
         prefetch_version = str(scca.format_version)
-        executable_file_name = str(scca.executable_filename)
-        prefetch_hash = format(scca.prefetch_hash, 'x').upper()
+        exe_file_name = str(scca.executable_filename)
+        pf_hash = format(scca.prefetch_hash, 'x').upper()
         run_count = (scca.run_count) 
         number_of_volumes = str(scca.number_of_volumes)
         number_of_files = str(scca.number_of_file_metrics_entries)
+        
+        # Get Volume Information
+        vol_info = []
+        for volume_information in iter(scca.volumes):
+            volume_serial_number = format(volume_information.serial_number,'x').upper()                                        
+            volume_device_path = str(volume_information.device_path)
+            volume_timestamp = volume_information.creation_time.strftime("%Y-%m-%d %H:%M:%S")
+            vol_tally = (volume_device_path, volume_timestamp, volume_serial_number)
+            vol_info.append(vol_tally)  
+
+        # Create a list and count of all file loaded with prefetch   
         count=1
-        all_strings = []
+        all_files = []
         for entry_index, file_metrics in enumerate(scca.file_metrics_entries):            
-            mapped_file_string = file_metrics.filename
-            strings = (pf_file_name,executable_file_name,count, number_of_files,mapped_file_string)
-            all_strings.append(strings)
+            file_loaded = str(file_metrics.filename)
+            file_tally = (str(count), number_of_files, file_loaded)
+            all_files.append(file_tally)
             count = (count + 1)
-        stringsfile = (outpath + '_strings.csv')
-        strings_file = open(stringsfile, 'a+')
-        with strings_file:
-            write = csv.writer(strings_file) 
-            write.writerows(all_strings) 
-        #Parse last run timestamps for each last run value
-        for exe_timestamp in range(8):            
-            if scca.get_last_run_time_as_integer(exe_timestamp) > 0:
-                time = (scca.get_last_run_time(exe_timestamp).strftime("%Y-%m-%d %H:%M:%S"))
-                run_count_number = (str(run_count - exe_timestamp) +"_of_"+ str(run_count)) 
-                prefetch_values = [time,executable_file_name,prefetch_hash,run_count_number,pf_file_name,prefetch_version,number_of_volumes]
-                # Find volume information for each prefetch file and append to prefetch output                 
-                for volume_information in iter(scca.volumes):
-                    volume_serial_number = format(volume_information.serial_number,'x').upper()                                        
-                    volume_device_path = str(volume_information.device_path)
-                    volume_timestamp = volume_information.creation_time.strftime("%Y-%m-%d %H:%M:%S")
-                    prefetch_values.append(volume_timestamp)
-                    prefetch_values.append(volume_device_path)
-                    prefetch_values.append(volume_serial_number)
-                print(','.join(prefetch_values))
-                runcountsfile = (outpath + '_run_count.csv')
-                if int(prefetch_version) <30:
-                    run_count_file = open(runcountsfile, 'a+')
-                    with run_count_file:     
-                        write = csv.writer(run_count_file)
-                        write.writerow(prefetch_values)
-                        exit() 
-                everything.append(prefetch_values)
-        run_count_file = open(runcountsfile, 'a+')
-        with run_count_file:     
-            write = csv.writer(run_count_file)
-            write.writerows(everything)                 
+
+        #Parse timestamps for last run value
+        for pf_timestamp in range(8):            
+            if scca.get_last_run_time_as_integer(pf_timestamp) > 0:
+                time = (scca.get_last_run_time(pf_timestamp).strftime("%Y-%m-%d %H:%M:%S"))
+                run_count_number = (str(run_count - pf_timestamp) +"_of_"+ str(run_count)) 
+                pf_tally = (time,run_count_number,pf_file_name,exe_file_name,pf_hash)
+                prefetch_values.append(pf_tally)
+
+        
+        if not Timeline:
+            pf_list = [list(x) for x in prefetch_values] 
+            print(tabulate(pf_list, ["Time", "Run Count", "Prefetch File",  "Executable File", "Prefetch Hash"], "grid"))
+            vol_list = [list(x) for x in vol_info]
+            print(tabulate(vol_list, ["Volume Path", "Volume Timestamp", "Serial Number"], "grid"))                    
+            file_list = [list(x) for x in all_files]
+            print(tabulate(file_list, ["Count", "Total", "File"], "grid"))
+            print("\n- .... . / . -. -.. / \n")
+        else:
+            for v in prefetch_values:
+                print(*v, sep = ',')
+            
     except:
-        pass
+        pass            
 
 def main():
-    # Set arguments to parse input path
-    parser = argparse.ArgumentParser(description='Extracts Prefetch metadata and strings based run count.  csv output as 2 files')
-    parser.add_argument('file_or_directory', help="Prefetch file or directory")
-    parser.add_argument('-o','--output', default='Prefetch', help="Name output files base name, Default=Prefetch (Prefetch_runcounts.csv, Prefetch_strings.csv)")
+    # Set arguments for input and output
+    parser = argparse.ArgumentParser(description='Extract Prefetch info based run count')
+    parser.add_argument('file_or_directory', help="Path to Prefetch file or directory")
+    parser.add_argument('-t','--timeline', default=False, action = 'store_true', help="Print run times as a timeline)")
     args = parser.parse_args()
-    argspath = args.file_or_directory
-    outpath = args.output
+    Timeline = args.timeline
 
-    #Create header for output files
-    pf_header='last_run_time,exe_file,pf_hash,pf_run_count,pf_file,pf_version,volume_count,volume_timestamp,volume_dev_path,volume_serial_number,volume_timestamp,volume_dev_path,volume_serial_number'
-    strings_header='pf_file,pf_executable_file,file_sequence,total_files,files_loaded'
-    print(pf_header)
-
-    #Write header information for 2 output files
-    run_counts_file = open((outpath + '_run_count.csv'), "w")
-    write = csv.writer(run_counts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar=' ')
-    write.writerow([pf_header])
-    run_counts_file.close()
-    strings_file = open((outpath + '_strings.csv'), "w")
-    write = csv.writer(strings_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar=' ')
-    write.writerow([strings_header])
-    strings_file.close()
 
 
     #Enumerate and verify files in directory path, then send to parser
@@ -111,12 +81,15 @@ def main():
         for dir_item in os.listdir(args.file_or_directory):
             file_to_parse = os.path.join(args.file_or_directory, dir_item)
             if os.path.isfile(file_to_parse):
-               parse_file(file_to_parse,outpath)
+               #parse_file(file_to_parse)
+               parse_file(file_to_parse,Timeline)
+
     #Enumerate and verify file in input string, then send to parser
     elif os.path.isfile(args.file_or_directory):
         if  args.file_or_directory.lower().endswith('pf'):
             file_to_parse = args.file_or_directory
-            parse_file(file_to_parse,outpath)
+            #parse_file(file_to_parse)
+            parse_file(file_to_parse,Timeline)            
     else:
         print("invalid path!!") 
 
