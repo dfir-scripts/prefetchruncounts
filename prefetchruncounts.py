@@ -5,6 +5,7 @@
 #
 #
 
+import sys
 import argparse
 import os
 import pyscca
@@ -49,8 +50,20 @@ def parse_file(prefetch_file,Timeline):
                 run_count_number = (str(run_count - pf_timestamp) +"_of_"+ str(run_count)) 
                 pf_tally = (time,run_count_number,pf_file_name,exe_file_name,pf_hash)
                 prefetch_values.append(pf_tally)
-
-        
+                if int(prefetch_version) <30:
+                    if not Timeline:
+                        pf_list = [list(x) for x in prefetch_values] 
+                        print(tabulate(pf_list, ["Time", "Run Count", "Prefetch File",  "Executable File", "Prefetch Hash"], "grid"))
+                        vol_list = [list(x) for x in vol_info]
+                        print(tabulate(vol_list, ["Volume Path", "Volume Timestamp", "Serial Number"], "grid"))                    
+                        file_list = [list(x) for x in all_files]
+                        print(tabulate(file_list, ["Count", "Total", "File"], "grid"))
+                        print("\n- .... . / . -. -.. / \n")
+                        return True
+                    else:
+                        for v in prefetch_values:
+                            print(*v, sep = ',')
+                        return True    
         if not Timeline:
             pf_list = [list(x) for x in prefetch_values] 
             print(tabulate(pf_list, ["Time", "Run Count", "Prefetch File",  "Executable File", "Prefetch Hash"], "grid"))
