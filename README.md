@@ -7,7 +7,7 @@ Outputs the last and most recent 8 run times for Windows 10 and later<br/>
 Uses pyscca to decompress pf MAM files and list dlls and other resulting file executions<br/>
 
 
-usage: prefetchruncounts.py [-h] [-t] file_or_directory<br/><br/>
+usage: prefetchruncounts.py file_or_directory   [-h] [-t] <br/><br/>
 
 Extract Prefetch info based on run counts<br/>
 positional arguments:<br/>
