@@ -5,9 +5,11 @@ Parse and extract a sortable list of basic Windows Prefetch file information bas
 Outputs the last and most recent 8 run times for Windows 10 and later<br/>
 (Earlier prefetch versions only show the most recent run time)<br/>
 Uses pyscca to decompress pf MAM files and list dlls and other resulting file executions<br/>
+For quick triage, load as an excel pivot table using slices.<br/>
 
 
-usage: prefetchruncounts.py file_or_directory   [-h] [-t] <br/><br/>
+
+usage: prefetchruncounts.py file_or_directory   [-h] [-n] [-t] <br/><br/>
 
 Extract Prefetch info based on run counts<br/>
 positional arguments:<br/>
@@ -15,4 +17,5 @@ positional arguments:<br/>
 
 optional arguments:<br/>
   -h, --help         show this help message and exit<br/>
+  -n, --no header    Print run times as a timeline)<br/>
   -t, --timeline     Print run times as a timeline)<br/>
