@@ -33,9 +33,8 @@ def parse_file(prefetch_file,Timeline):
                 run_count_number = (str(run_count - pf_timestamp) +"_of_"+ str(run_count))
                 pf_tally = (time,run_count_number,pf_mtime,pf_ctime,exe_file_name,pf_file_name,pf_hash,number_of_files,padding)
                 prefetch_values.append(pf_tally)
-        for v in prefetch_values:
-            print(*v, sep = ',')
-            #return True
+            for v in prefetch_values:
+                print(*v, sep = ',')
 
         # Create a list and count of all files loaded with prefetch
         if not Timeline:
