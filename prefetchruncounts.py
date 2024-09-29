@@ -28,23 +28,27 @@ def parse_file(prefetch_file,Timeline):
         #Parse timestamps for last run value
         for pf_timestamp in range(8):
             if scca.get_last_run_time_as_integer(pf_timestamp) > 0:
-                padding = "_,_"
+                padding = "_,_,_"
                 time = (scca.get_last_run_time(pf_timestamp).strftime("%Y-%m-%d %H:%M:%S"))
                 run_count_number = (str(run_count - pf_timestamp) +"_of_"+ str(run_count))
-                pf_tally = (time,run_count_number,pf_mtime,pf_ctime,exe_file_name,pf_file_name,pf_hash,number_of_files,padding)
-                prefetch_values.append(pf_tally)
-            for v in prefetch_values:
-                print(*v, sep = ',')
+                pf_tally = (time,run_count_number,pf_mtime,pf_ctime,exe_file_name,pf_file_name,pf_hash,padding)
+                if pf_tally not in prefetch_values:
+                    prefetch_values.append(pf_tally)
+        for v in prefetch_values:
+            print(*v, sep = ',')
 
         # Create a list and count of all files loaded with prefetch
         if not Timeline:
             all_files = []
             for entry_index, file_metrics in enumerate(scca.file_metrics_entries):
                 padding = "_,_,_,_"
+                load_count_item = (entry_index +1)
+                load_count = (str(load_count_item) + "_of_" + (str(number_of_files)))
                 long_file_name = str(file_metrics.filename)
                 long_file_name = long_file_name[::-1].replace("\\", ",", 1)[::-1]
-                file_tally = (padding,exe_file_name,pf_file_name,pf_hash,number_of_files,long_file_name)
-                all_files.append(file_tally)
+                file_tally = (padding,exe_file_name,pf_file_name,pf_hash,load_count,long_file_name)
+                if file_tally not in prefetch_values:
+                    all_files.append(file_tally)
             for v in all_files:
                 print(*v, sep=',')
     except:
@@ -61,7 +65,7 @@ def main():
     No_Header = args.no_header
 
     if not No_Header:
-        print("time,run_count,pf_mtime,pf_ctime,exe_file,pf_file,pf_hash,load_count,load_file_path,load_file")
+        print("time,run_count,pf_mtime,pf_ctime,exe_file,pf_file,pf_hash,load_file_count,load_file_path,load_file")
 
     #Enumerate and verify files in directory path, then send to parser
     if (os.path.isdir(args.file_or_directory)):
